@@ -6,7 +6,7 @@ namespace app\forms;
 
 use yii\base\Model;
 
-class RegisterForm extends Model
+class LoginForm extends Model
 {
     public string $email = '';
     public string $password = '';

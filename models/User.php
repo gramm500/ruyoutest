@@ -9,11 +9,14 @@ use Yii;
 use yii\base\Exception;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
 
-class User extends ActiveRecord implements \yii\web\IdentityInterface
+class User extends ActiveRecord implements IdentityInterface
 {
-
+    // не знаю что за магия тут, но без этого получаю ошибку DB
+    public $username = '';
     private const  EXPIRE_TIME = 604800; // valid a week
+
     public function behaviors(): array
     {
         return [
@@ -29,8 +32,19 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
     public function rules(): array
     {
         return [
-            [['email', 'password'], 'safe'],
+            [['email', 'password'], 'required'],
+            [['email', 'password', 'first_name', 'last_name', 'phone'], 'safe'],
+        ];
+    }
 
+    public function fields(): array
+    {
+        return [
+            'id',
+            'email',
+            'firstName' => 'first_name',
+            'lastName' => 'last_name',
+            'phone',
         ];
     }
 
@@ -52,7 +66,7 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        $user = self::find()->where(['token' => $token])->one;
+        $user = self::find()->where(['token' => $token])->one();
         if ($user === null) {
             return null;
         }
@@ -83,17 +97,6 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
     {
         $this->token = Yii::$app->security->generateRandomString();
         return $this->token;
-    }
-
-    /**
-     * Finds user by username
-     *
-     * @param string $username
-     * @return static|null
-     */
-    public static function findByUsername($username)
-    {
-        return null;
     }
 
     /**
